@@ -1,0 +1,38 @@
+# %%
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import requests
+import torch
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+from datetime import datetime
+
+
+app = FastAPI()
+
+# CORS setup
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # React dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+tokenizer = T5Tokenizer.from_pretrained("model")
+model = T5ForConditionalGeneration.from_pretrained("model")
+
+class TranslationRequest(BaseModel) :
+    french: str
+    sentiment: str
+
+@app.post("/translate")
+def translate(req: TranslationRequest):
+    input_text = f"<{req.sentiment}> {req.french}"
+    tokens = tokenizer.encode(input_text, return_tensors="pt")
+    output_ids = model.generate(tokens, max_length=128)
+    translation = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+
+    return {"translation": translation}
+
+

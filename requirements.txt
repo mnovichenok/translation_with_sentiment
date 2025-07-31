@@ -1,0 +1,9 @@
+fastapi
+pydantic
+requests
+torch
+transformers
+pandas
+numpy
+sentencepiece
+uvicorn
