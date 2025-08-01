@@ -8,7 +8,13 @@ services:
     container_name: translation-backend
     ports:
       - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/translation_db
+    depends_on:
+      - db
     restart: unless-stopped
+    volumes:
+      - ./model:/app/model
 
   ui:
     build:
@@ -20,4 +26,21 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+  db:
+    image: postgres:15
+    container_name: translation-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: translation_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  db_data: {}
+
+
 
